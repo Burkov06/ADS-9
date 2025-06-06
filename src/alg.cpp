@@ -9,19 +9,21 @@
 
 #include "tree.h"
 
-PMTree::Node::Node(char v) : val(v) {}
-
-PMTree::Node::~Node() {
-  for (auto c : children) {
-    delete c;
-  }
+PMTree::Node::Node(char symbol) {
+    val = symbol;
 }
 
-PMTree::PMTree(const std::vector<char>& elems) {
-  root_ = new Node('\0');
-  std::vector<char> rem = elems;
-  std::sort(rem.begin(), rem.end());
-  buildTree(root_, rem);
+PMTree::Node::~Node() {
+    std::for_each(children.begin(), children.end(), [](Node* child) {
+        delete child;
+    });
+}
+
+PMTree::PMTree(const std::vector<char>& elements) : root_(nullptr) {
+    root_ = new Node(0);
+    auto sorted_elements = elements;
+    std::sort(sorted_elements.begin(), sorted_elements.end());
+    constructTree(root_, sorted_elements);
 }
 
 PMTree::~PMTree() {
@@ -32,18 +34,17 @@ PMTree::Node* PMTree::getRoot() const {
   return root_;
 }
 
-void PMTree::buildTree(Node* node, const std::vector<char>& remaining) {
-  if (remaining.empty()) return;
-  std::vector<char> rem = remaining;
-  std::sort(rem.begin(), rem.end());
-  for (size_t i = 0; i < rem.size(); ++i) {
-    char c = rem[i];
-    Node* child = new Node(c);
-    node->children.push_back(child);
-    std::vector<char> next = rem;
-    next.erase(next.begin() + i);
-    buildTree(child, next);
-  }
+void PMTree::constructTree(Node* current, const std::vector<char>& elements) {
+    if (elements.size() == 0) return;
+    
+    for (size_t pos = 0; pos < elements.size(); ++pos) {
+        Node* new_child = new Node(elements[pos]);
+        current->children.emplace_back(new_child);
+        
+        std::vector<char> new_elements(elements);
+        new_elements.erase(new_elements.begin() + pos);
+        constructTree(new_child, new_elements);
+    }
 }
 
 namespace {
