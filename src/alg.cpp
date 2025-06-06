@@ -6,7 +6,8 @@
 PMTree::Node::Node(char v) : val(v) {}
 
 PMTree::Node::~Node() {
-  for (auto c : children) delete c;
+  for (auto c : children)
+    delete c;
 }
 
 PMTree::PMTree(const std::vector<char>& elems) {
@@ -34,12 +35,17 @@ void PMTree::buildTree(Node* node, const std::vector<char>& remaining) {
   }
 }
 
-static void dfs(PMTree::Node* node, std::vector<char>& path, std::vector<std::vector<char>>& result) {
-  if (node->val != '\0') path.push_back(node->val);
-  if (node->children.empty()) result.push_back(path);
+static void dfs(PMTree::Node* node,
+                std::vector<char>& path,
+                std::vector<std::vector<char>>& result) {
+  if (node->val != '\0')
+    path.push_back(node->val);
+  if (node->children.empty())
+    result.push_back(path);
   for (auto* child : node->children)
     dfs(child, path, result);
-  if (node->val != '\0') path.pop_back();
+  if (node->val != '\0')
+    path.pop_back();
 }
 
 std::vector<std::vector<char>> getAllPerms(const PMTree& tree) {
@@ -51,7 +57,9 @@ std::vector<std::vector<char>> getAllPerms(const PMTree& tree) {
 
 std::vector<char> getPerm1(PMTree& tree, int num) {
   auto perms = getAllPerms(tree);
-  return (num >= 1 && num <= static_cast<int>(perms.size())) ? perms[num - 1] : std::vector<char>{};
+  if (num >= 1 && num <= static_cast<int>(perms.size()))
+    return perms[num - 1];
+  return {};
 }
 
 std::vector<char> getPerm2(PMTree& tree, int num) {
@@ -63,9 +71,11 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
   int n = elems.size();
 
   std::vector<int64_t> factorial(n + 1, 1);
-  for (int i = 2; i <= n; ++i) factorial[i] = factorial[i - 1] * i;
+  for (int i = 2; i <= n; ++i)
+    factorial[i] = factorial[i - 1] * i;
 
-  if (num < 1 || num > factorial[n]) return {};
+  if (num < 1 || num > factorial[n])
+    return {};
 
   num--;
   std::vector<char> result;
