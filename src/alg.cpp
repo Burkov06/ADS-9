@@ -48,19 +48,29 @@ void PMTree::constructTree(Node* current, const std::vector<char>& elements) {
 }
 
 namespace {
-void dfs(PMTree::Node* node, std::vector<char>& path,
-         std::vector<std::vector<char>>& out) {
-  if (node->val != '\0') path.push_back(node->val);
-  if (node->children.empty()) {
-    out.push_back(path);
-  } else {
-    for (auto child : node->children) {
-      dfs(child, path, out);
+void traverseTree(PMTree::Node* current_node, 
+                std::vector<char>& current_path,
+                std::vector<std::vector<char>>& results) {
+    bool is_root = (current_node->val == '\0');
+    
+    if (!is_root) {
+        current_path.emplace_back(current_node->val);
     }
-  }
-  if (node->val != '\0') path.pop_back();
+    
+    if (current_node->children.empty()) {
+        results.emplace_back(current_path);
+    } else {
+        std::for_each(current_node->children.begin(), current_node->children.end(),
+            [&](PMTree::Node* child) {
+                traverseTree(child, current_path, results);
+            });
+    }
+    
+    if (!is_root) {
+        current_path.pop_back();
+    }
 }
-}  // namespace
+}
 
 std::vector<std::vector<char>> getAllPerms(const PMTree& tree) {
   std::vector<std::vector<char>> result;
@@ -75,25 +85,31 @@ std::vector<char> getPerm1(PMTree& tree, int num) {
   return all[num - 1];
 }
 
-std::vector<char> getPerm2(PMTree& tree, int num) {
-  std::vector<char> elems;
-  for (auto child : tree.getRoot()->children) {
-    elems.push_back(child->val);
-  }
-  int n = elems.size();
-  int64_t total = 1;
-  for (int i = 2; i <= n; ++i) total *= i;
-  if (num < 1 || num > total) return {};
-  num -= 1;
-  std::vector<char> result;
-  std::vector<char> available = elems;
-  for (int i = n; i >= 1; --i) {
-    int64_t fact = 1;
-    for (int j = 2; j < i; ++j) fact *= j;
-    int idx = num / fact;
-    result.push_back(available[idx]);
-    available.erase(available.begin() + idx);
-    num %= fact;
-  }
-  return result;
+std::vector<char> getPerm2(PMTree& tree, int position) {
+    const auto& root_children = tree.getRoot()->children;
+    std::vector<char> symbols;
+    std::transform(root_children.begin(), root_children.end(), 
+                  std::back_inserter(symbols),
+                  [](const PMTree::Node* node) { return node->val; });
+    
+    int count = symbols.size();
+    int factorial = std::accumulate(symbols.begin(), symbols.end(), 1,
+        [](int a, char) { return a * (a + 1); }); // Альтернативный расчёт факториала
+    
+    if (position < 1 || position > factorial) return {};
+    
+    std::vector<char> permutation;
+    std::vector<char> remaining_symbols = symbols;
+    int current_pos = position - 1;
+    
+    while (count > 0) {
+        factorial /= count;
+        int index = current_pos / factorial;
+        permutation.emplace_back(remaining_symbols[index]);
+        remaining_symbols.erase(remaining_symbols.begin() + index);
+        current_pos %= factorial;
+        count--;
+    }
+    
+    return permutation;
 }
