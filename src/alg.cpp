@@ -3,10 +3,16 @@
 #include <fstream>
 #include <locale>
 #include <cstdlib>
-#include <vector>
-#include <algorithm>
-#include <cstdint>
 #include "tree.h"
+#include <algorithm>
+
+PMTree::Node::Node(char v) : val(v) {}
+
+PMTree::Node::~Node() {
+  for (auto c : children) {
+    delete c;
+  }
+}
 
 PMTree::PMTree(const std::vector<char>& elems) {
   root_ = new Node('\0');
@@ -19,14 +25,19 @@ PMTree::~PMTree() {
   delete root_;
 }
 
-void PMTree::buildTree(Node* node, std::vector<char> remaining) {
+PMTree::Node* PMTree::getRoot() const {
+  return root_;
+}
+
+void PMTree::buildTree(Node* node, const std::vector<char>& remaining) {
   if (remaining.empty()) return;
-  std::sort(remaining.begin(), remaining.end());
-  for (size_t i = 0; i < remaining.size(); ++i) {
-    char c = remaining[i];
+  std::vector<char> rem = remaining;
+  std::sort(rem.begin(), rem.end());
+  for (size_t i = 0; i < rem.size(); ++i) {
+    char c = rem[i];
     Node* child = new Node(c);
     node->children.push_back(child);
-    std::vector<char> next = remaining;
+    std::vector<char> next = rem;
     next.erase(next.begin() + i);
     buildTree(child, next);
   }
@@ -45,7 +56,7 @@ void dfs(PMTree::Node* node, std::vector<char>& path,
   }
   if (node->val != '\0') path.pop_back();
 }
-}
+}  // namespace
 
 std::vector<std::vector<char>> getAllPerms(const PMTree& tree) {
   std::vector<std::vector<char>> result;
@@ -65,7 +76,7 @@ std::vector<char> getPerm2(PMTree& tree, int num) {
   for (auto child : tree.getRoot()->children) {
     elems.push_back(child->val);
   }
-  int n = static_cast<int>(elems.size());
+  int n = elems.size();
   int64_t total = 1;
   for (int i = 2; i <= n; ++i) total *= i;
   if (num < 1 || num > total) return {};
