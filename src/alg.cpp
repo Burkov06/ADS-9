@@ -1,12 +1,13 @@
 // Copyright 2022 NNTU-CS
-#include "tree.h"
 
-#include <vector>
+#include <cstdlib>
+#include <locale>
 #include <iostream>
 #include <fstream>
-#include <locale>
-#include <cstdlib>
+#include <vector>
 #include <algorithm>
+
+#include "tree.h"
 
 PMTree::Node::Node(char v) : val(v) {}
 
